@@ -42,7 +42,20 @@ const postEditProduct = function (req, res) {
     .catch((err) => console.log(err));
 };
 
+const postDeleteProduct = function (req, res, next) {
+  const prodId = req.body.id;
+  Product.deleteProduct(prodId)
+    .then(() => {
+      return res.json({ message: "Product deleted" });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ message: "Internal server error" });
+    });
+};
+
 module.exports = {
   postAddProduct,
   postEditProduct,
+  postDeleteProduct,
 };
