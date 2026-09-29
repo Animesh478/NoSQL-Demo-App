@@ -1,3 +1,4 @@
+const mongodb = require("mongodb");
 const { dbConnect } = require("../utils/database");
 
 class Product {
@@ -31,6 +32,19 @@ class Product {
         return products;
       })
       .catch((err) => console.log(err));
+  }
+
+  static fetchProduct(id) {
+    const db = dbConnect();
+    return db
+      .collection("products")
+      .find({ _id: new mongodb.ObjectId(id) })
+      .next()
+      .then((product) => {
+        console.log(product);
+        return product;
+      })
+      .catch();
   }
 }
 
