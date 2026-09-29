@@ -6,7 +6,7 @@ let _db;
 const mongoConnect = async function (callback) {
   try {
     const client = await MongoClient.connect(process.env.URI);
-    _db = await client.db();
+    _db = client.db();
     // after the connection to the database server is complete, the backend server starts listening for requests
     callback();
   } catch (error) {
