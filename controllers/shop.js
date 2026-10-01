@@ -1,3 +1,4 @@
+const Product = require("../models/product");
 const { fetchAllProducts, fetchProduct } = require("../models/product");
 
 async function getProducts(req, res, next) {
@@ -19,7 +20,22 @@ async function getProduct(req, res, next) {
   }
 }
 
+async function postCart(req, res, next) {
+  const productId = req.body.productId;
+  Product.fetchProduct(productId)
+    .then((product) => {
+      console.log("product=", product);
+      return req.user.addToCart(product);
+    })
+    .then((result) => {
+      console.log(result);
+      res.json({ data: result });
+    })
+    .catch((err) => console.log(err));
+}
+
 module.exports = {
   getProducts,
   getProduct,
+  postCart,
 };
