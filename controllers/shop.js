@@ -43,9 +43,23 @@ async function getCart(req, res, next) {
     .catch((err) => console.log(err));
 }
 
+async function deleteCartItem(req, res, next) {
+  const productId = req.body.productId;
+  req.user
+    .deleteCartItem(productId)
+    .then((result) => {
+      return res.json({ data: result, message: "Item deleted successfully" });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Failed to delete item" });
+    });
+}
+
 module.exports = {
   getProducts,
   getProduct,
   postCart,
   getCart,
+  deleteCartItem,
 };
