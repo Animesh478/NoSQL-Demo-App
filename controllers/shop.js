@@ -34,8 +34,18 @@ async function postCart(req, res, next) {
     .catch((err) => console.log(err));
 }
 
+async function getCart(req, res, next) {
+  req.user
+    .getCart()
+    .then((products) => {
+      res.json({ data: products });
+    })
+    .catch((err) => console.log(err));
+}
+
 module.exports = {
   getProducts,
   getProduct,
   postCart,
+  getCart,
 };

@@ -24,12 +24,8 @@ class User {
   addToCart(product) {
     // product = {}
     const cartProductIndex = this.cart.items.findIndex((cp) => {
-      //   console.log("cp.productId", cp.productId);
-      //   console.log("product._id", product._id);
       return cp.productId.equals(product._id);
     });
-
-    console.log("cartProductIndex=", cartProductIndex);
 
     const updatedCartItems = [...this.cart.items];
     // let updatedQuantity = 1;
@@ -54,6 +50,26 @@ class User {
         { _id: new mongodb.ObjectId(this._id) },
         { $set: { cart: updatedCart } },
       );
+  }
+
+  getCart() {
+    const db = dbConnect();
+    const productIds = this.cart.items.map((product) => product.productId);
+    console.log("productIds=", productIds);
+    return db
+      .collection("products")
+      .find({ _id: { $in: productIds } })
+      .toArray()
+      .then((products) => {
+        return products.map((product) => {
+          return {
+            ...product,
+            quantity: this.cart.items.find(
+              (item) => item.productId.equals(product._id).quantity,
+            ),
+          };
+        });
+      });
   }
 
   static findUser(id) {
