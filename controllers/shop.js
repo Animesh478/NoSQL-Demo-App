@@ -63,6 +63,15 @@ async function postAddOrder(req, res, next) {
     .catch((err) => res.status(500).json({ message: "Internal server error" }));
 }
 
+async function getOrder(req, res, next) {
+  req.user
+    .fetchOrder()
+    .then((result) => {
+      res.json({ data: result });
+    })
+    .catch((err) => res.status(500).json({ message: err.message }));
+}
+
 module.exports = {
   getProducts,
   getProduct,
@@ -70,4 +79,5 @@ module.exports = {
   getCart,
   deleteCartItem,
   postAddOrder,
+  getOrder,
 };

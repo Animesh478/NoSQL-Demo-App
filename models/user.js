@@ -114,6 +114,16 @@ class User {
       });
   }
 
+  fetchOrder() {
+    const db = dbConnect();
+    return db
+      .collection("orders")
+      .find({ "user._id": new mongodb.ObjectId(this._id) })
+      .toArray()
+      .then((orders) => orders)
+      .catch((err) => console.log(err));
+  }
+
   static findUser(id) {
     const db = dbConnect();
     return db
