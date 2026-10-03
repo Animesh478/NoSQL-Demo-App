@@ -55,7 +55,7 @@ class User {
   getCart() {
     const db = dbConnect();
     const productIds = this.cart.items.map((product) => product.productId);
-    console.log("productIds=", productIds);
+    // console.log("productIds=", productIds);
     return db
       .collection("products")
       .find({ _id: { $in: productIds } })
@@ -84,6 +84,34 @@ class User {
         { _id: new mongodb.ObjectId(this._id) },
         { $set: { cart: { items: updatedCartItems } } },
       );
+  }
+
+  addOrder() {
+    const db = dbConnect();
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: {
+            _id: new mongodb.ObjectId(this._id),
+            name: this.name,
+            email: this.email,
+          },
+        };
+        return db.collection("orders").insertOne(order);
+      })
+      .then((result) => {
+        this.cart = { items: [] };
+        return db
+          .collection("users")
+          .updateOne(
+            { _id: new mongodb.ObjectId(this._id) },
+            { $set: { cart: { items: [] } } },
+          );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   static findUser(id) {

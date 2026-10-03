@@ -56,10 +56,18 @@ async function deleteCartItem(req, res, next) {
     });
 }
 
+async function postAddOrder(req, res, next) {
+  req.user
+    .addOrder()
+    .then((result) => res.json({ data: result }))
+    .catch((err) => res.status(500).json({ message: "Internal server error" }));
+}
+
 module.exports = {
   getProducts,
   getProduct,
   postCart,
   getCart,
   deleteCartItem,
+  postAddOrder,
 };
