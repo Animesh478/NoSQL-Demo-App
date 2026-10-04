@@ -7,8 +7,9 @@ const postAddProduct = function (req, res) {
   const description = req.body.description;
   const price = req.body.price;
   const imageUrl = req.body.imageUrl;
+  const userId = req.user;
 
-  const product = new Product(title, description, price, imageUrl);
+  const product = new Product({ title, description, price, imageUrl, userId });
 
   product
     .save()
@@ -18,7 +19,7 @@ const postAddProduct = function (req, res) {
     .catch((err) => console.log(err));
 };
 
-const postEditProduct = function (req, res) {
+const postEditProduct = async function (req, res) {
   // console.log("inside admin controller");
   const prodId = req.body.id;
   const title = req.body.title;
@@ -26,32 +27,38 @@ const postEditProduct = function (req, res) {
   const price = req.body.price;
   const imageUrl = req.body.imageUrl;
 
-  const product = new Product(
-    title,
-    description,
-    price,
-    imageUrl,
-    new mongodb.ObjectId(prodId),
+  await Product.updateOne(
+    { _id: prodId },
+    { title, description, price, imageUrl },
   );
 
-  product
-    .save()
-    .then((result) => {
-      res.json({ data: result });
-    })
-    .catch((err) => console.log(err));
+  res.status(200).json({ message: "Product details updated" });
+
+  // const product = new Product(
+  //   title,
+  //   description,
+  //   price,
+  //   imageUrl,
+  //   prodId,
+  // );
+
+  // product
+  //   .save()
+  //   .then((result) => {
+  //     res.json({ data: result });
+  //   })
+  //   .catch((err) => console.log(err));
 };
 
-const postDeleteProduct = function (req, res, next) {
+const postDeleteProduct = async function (req, res, next) {
   const prodId = req.body.id;
-  Product.deleteProduct(prodId)
-    .then(() => {
-      return res.json({ message: "Product deleted" });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ message: "Internal server error" });
-    });
+  try {
+    await Product.findByIdAndDelete(prodId);
+    return res.json({ message: "Product deleted" });
+  } catch (error) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 module.exports = {
