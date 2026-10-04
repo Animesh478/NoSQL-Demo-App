@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const Order = require("../models/order");
 // const { fetchAllProducts, fetchProduct } = require("../models/product");
 
 async function getProducts(req, res, next) {
@@ -35,6 +36,7 @@ async function postCart(req, res, next) {
 async function getCart(req, res, next) {
   try {
     const products = await req.user.populate("cart.items.productId");
+    // console.log("products=", products);
     res.json({ data: products.cart.items });
   } catch (error) {
     console.log(error);
@@ -56,19 +58,33 @@ async function deleteCartItem(req, res, next) {
 }
 
 async function postAddOrder(req, res, next) {
-  req.user
-    .addOrder()
-    .then((result) => res.json({ data: result }))
-    .catch((err) => res.status(500).json({ message: "Internal server error" }));
+  const user = { name: req.user.name, userId: req.user._id };
+  const products = await req.user.populate("cart.items.productId");
+  const prodList = products.cart.items.map((item) => {
+    return { product: { ...item.productId._doc }, quantity: item.quantity }; //_doc is used to extract the actual data
+  });
+
+  const order = new Order({ products: prodList, user });
+  const result = await order.save();
+  await req.user.clearCart();
+  res.json({ data: result });
 }
 
 async function getOrder(req, res, next) {
-  req.user
-    .fetchOrder()
-    .then((result) => {
-      res.json({ data: result });
-    })
-    .catch((err) => res.status(500).json({ message: err.message }));
+  try {
+    const result = await Order.find({ "user.userId": req.user._id });
+    res.json({ data: result });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+
+  // req.user
+  //   .fetchOrder()
+  //   .then((result) => {
+  //     res.json({ data: result });
+  //   })
+  //   .catch((err) => res.status(500).json({ message: err.message }));
 }
 
 module.exports = {
